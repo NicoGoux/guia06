@@ -2,6 +2,7 @@ package died.guia06;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import died.guia06.util.Registro;
@@ -31,7 +32,6 @@ public class Curso {
 		this.inscriptos = new ArrayList<Alumno>();
 		this.log = new Registro();
 	}
-	
 
 	/**
 	 * Este método, verifica si el alumno se puede inscribir y si es así lo agrega al curso,
@@ -46,17 +46,24 @@ public class Curso {
 	 * @param a
 	 * @return
 	 */
+	
 	public Boolean inscribir(Alumno a) {
-		
-		try {
-			log.registrar(this, "inscribir ",a.toString());
+		if (this.cupo>this.inscriptos.size() && a.cursandoCicloLectivo(this.cicloLectivo) &&this.creditosRequeridos<=a.getCreditos()) {
+			try {
+				log.registrar(this, "inscribir ",a.toString());
+				a.inscripcionAceptada(this);
+			}
+			
+			catch (IOException e) {
+				return false;
+			}
+			
+			return true;
 		}
 		
-		catch (IOException e) {
+		else {
 			return false;
 		}
-		
-		return true;
 	}
 	
 	
@@ -64,8 +71,38 @@ public class Curso {
 	 * imprime los inscriptos en orden alfabetico
 	 */
 	public void imprimirInscriptos() {
-		log.registrar(this, "imprimir listado",this.inscriptos.size()+ " registros ");
+		try {
+			log.registrar(this, "imprimir listado",this.inscriptos.size()+ " registros ");
+			this.ordenarListaPorNombre();
+			int i=1;
+			for (Alumno a : this.inscriptos) {
+				System.out.println("Alumno "+i+": "+a.getNombre());
+				i++;
+			}
+		}
+		catch (IOException e) { 
+			
+		}
 	}
-
+	
+	public int getCreditos() {
+		return this.creditos;
+	}
+	
+	public int getCicloLectivo() {
+		return this.cicloLectivo;
+	}
+	
+	public void ordenarListaPorNombre() {
+		this.inscriptos.sort(Comparator.comparing(Alumno::getNombre));
+	}
+	
+	public void ordenarListaPorLegajo() {
+		this.inscriptos.sort(Comparator.comparing(Alumno::getNumeroLibreta));
+	}
+	
+	public void ordenarListaPorCreditos() {
+		this.inscriptos.sort(Comparator.comparing(Alumno::getCreditos));
+	}
 
 }
